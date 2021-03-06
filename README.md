@@ -19,8 +19,10 @@ LaravelアプリケーションをAWSへデプロイすることを想定したA
 git clone https://@github.com/IchikawaYoshihiro/laravel-docker-base.git
 cd laravel-docker-base
 
+cp .env.example .env
+
 // create new Laravel application
 laravel new src
 
-docker-compose up
+docker-compose up -d
 ```
