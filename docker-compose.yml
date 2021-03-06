@@ -1,0 +1,48 @@
+version: '3'
+services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "${mailhog_port}:8025"
+      - "${mailhog_smtp_port}:1025"
+
+  redis:
+    image: redis:latest
+    ports:
+        - "6389:6379"
+    command: redis-server
+
+  db:
+    command: mysqld
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: "${db_name}"
+    image: mysql:latest
+    ports:
+      - "${db_port}:3306"
+    restart: always
+    volumes:
+      - ./db/mysql:/var/lib/mysql
+      - ./db/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+
+  app:
+    build: ./app
+    depends_on:
+      - db
+      - redis
+      - mailhog
+    env_file: ./app/.env
+    restart: always
+    volumes:
+      - ./src:/src
+
+  web:
+    build: ./web
+    depends_on:
+      - app
+    ports:
+      - "${web_port}:80"
+    restart: always
+    volumes:
+      - ./src/public:/public
+      - ./web/log:/var/log/nginx/
